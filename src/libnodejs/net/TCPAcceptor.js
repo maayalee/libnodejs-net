@@ -34,6 +34,7 @@ class TCPAcceptor extends EventEmitter {
   }
   
   _onConnected(socket) {
+    this.emit(TCPEvent.CONNECTED);
   }
 }
 

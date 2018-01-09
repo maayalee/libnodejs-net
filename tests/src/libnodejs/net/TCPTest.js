@@ -20,15 +20,38 @@ class TCPTest extends TestCase {
   testConnect() {
     var acceptor = new TCPAcceptor();
     var listening = false;
+    var serverConnected = false;
     this.runs(function() {
       acceptor.addListener(TCPEvent.LISTENING, function() {
         listening = true;
       });
-      acceptor.listen("tcp://localhost:8001");
-    });
+      acceptor.addListener(TCPEvent.CONNECTED, function() {
+        console.log('conn1');
+        serverConnected = true;
+      });
+
+      acceptor.listen(TCPTest.TEST_HOST);
+    }, 1000);
     this.runs(function() {
       assert(listening === true);
     });
+
+    var connector = new TCPConnector();
+    var clientConnected = false;
+    this.runs(function() {
+      connector.addListener(TCPEvent.CONNECTED, function() {
+        console.log('conn');
+        clientConnected = true;
+      });
+      connector.connect(TCPTest.TEST_HOST);
+    });
+    this.waits(1000);
+    this.runs(function() {
+      console.dir(serverConnected);
+      assert(serverConnected === true);
+      assert(clientConnected === true);
+    });
+    this.waits(2000);
   }
 
   static createSuite() {
@@ -37,6 +60,8 @@ class TCPTest extends TestCase {
     return suite;
   }
 }
+
+TCPTest.TEST_HOST = "tcp://localhost:8001";
 
 module.exports = TCPTest;
 
