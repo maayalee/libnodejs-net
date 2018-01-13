@@ -11,47 +11,42 @@ class TCPTest extends TestCase {
     super(methodName);
   }
 
-  setUp() {
+  _setUp() {
   }
 
-  tearDown() {
+  _tearDown() {
   }
 
   testConnect() {
     var acceptor = new TCPAcceptor();
     var listening = false;
     var serverConnected = false;
-    this.runs(function() {
-      acceptor.addListener(TCPEvent.LISTENING, function() {
-        listening = true;
-      });
-      acceptor.addListener(TCPEvent.CONNECTED, function() {
-        console.log('conn1');
-        serverConnected = true;
-      });
-
+    acceptor.addListener(TCPEvent.LISTENING, function() {
+      listening = true;
+    });
+    acceptor.addListener(TCPEvent.CONNECTED, function() {
+      serverConnected = true;
+    });
+    this._runs(function() {
       acceptor.listen(TCPTest.TEST_HOST);
-    }, 1000);
-    this.runs(function() {
+    });
+    this._runs(function() {
       assert(listening === true);
     });
-
+    
     var connector = new TCPConnector();
     var clientConnected = false;
-    this.runs(function() {
-      connector.addListener(TCPEvent.CONNECTED, function() {
-        console.log('conn');
-        clientConnected = true;
-      });
+    connector.addListener(TCPEvent.CONNECTED, function() {
+      clientConnected = true;
+    });
+    this._runs(function() {
       connector.connect(TCPTest.TEST_HOST);
     });
-    this.waits(1000);
-    this.runs(function() {
-      console.dir(serverConnected);
+    this._waits(10);
+    this._runs(function() {
       assert(serverConnected === true);
       assert(clientConnected === true);
     });
-    this.waits(2000);
   }
 
   static createSuite() {

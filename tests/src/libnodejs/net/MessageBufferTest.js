@@ -10,11 +10,11 @@ class MessageBufferTest extends TestCase {
     this.buffer = null; 
   }
 
-  setUp() {
+  _setUp() {
     this.buffer = new MessageBuffer();
   }
 
-  tearDown() {
+  _tearDown() {
   }
 
   testPush() {
