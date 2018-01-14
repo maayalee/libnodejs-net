@@ -20,12 +20,8 @@ class TCPTest extends TestCase {
   testConnect() {
     var acceptor = new TCPAcceptor();
     var listening = false;
-    var serverConnected = false;
     acceptor.addListener(TCPEvent.LISTENING, function() {
       listening = true;
-    });
-    acceptor.addListener(TCPEvent.CONNECTED, function() {
-      serverConnected = true;
     });
     this._runs(function() {
       acceptor.listen(TCPTest.TEST_HOST);
@@ -36,6 +32,10 @@ class TCPTest extends TestCase {
     
     var connector = new TCPConnector();
     var clientConnected = false;
+    var serverConnected = false;
+    acceptor.addListener(TCPEvent.CONNECTED, function() {
+      serverConnected = true;
+    });
     connector.addListener(TCPEvent.CONNECTED, function() {
       clientConnected = true;
     });
@@ -47,11 +47,32 @@ class TCPTest extends TestCase {
       assert(serverConnected === true);
       assert(clientConnected === true);
     });
+  
+    var acceptorClosed = false;
+    var connectorClosed = false;
+    acceptor.addListener(TCPEvent.DISCONNECTED, function() {
+      acceptorClosed = true;
+    });
+    connector.addListener(TCPEvent.DISCONNECTED, function() {
+      connectorClosed = true;
+    });
+    this._runs(function() {
+      acceptor.close();
+    });
+    this._waits(10);
+    this._runs(function() {
+      assert(acceptorClosed === true);
+      assert(connectorClosed === true);
+    });
+  }
+  
+  testSendAndReceive() {
   }
 
   static createSuite() {
     var suite = new TestSuite('TCPTest');
     suite.add(new TCPTest('testConnect'));
+    suite.add(new TCPTest('testSendAndReceive'));
     return suite;
   }
 }

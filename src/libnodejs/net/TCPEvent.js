@@ -5,5 +5,6 @@ class TCPEvent {
 
 TCPEvent.LISTENING = "TCPEvent.Listening";
 TCPEvent.CONNECTED = "TCPEvent.Connected";
+TCPEvent.DISCONNECTED = "TCPEvent.Disconnected";
 
 module.exports = TCPEvent;
