@@ -67,7 +67,10 @@ class TCPTest extends TestCase {
   }
   
   testSendAndReceive() {
+    // 직접 data에 억세스 하지 않는다. 데이터 프로토콜을 처리해주는 객체를 통해 send, receive할 수 있다.
+    // 일단 MessageBuffer로 하고... 사용하는 측에서 추상화된 프로토콜 정책 객체에 의해 자유롭게 조작할 수 있도록 한다.
   }
+  
 
   static createSuite() {
     var suite = new TestSuite('TCPTest');
