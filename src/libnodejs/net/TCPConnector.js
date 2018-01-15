@@ -1,9 +1,14 @@
 /*jshint esnext: true */
 var net = require('net');
 var EventEmitter = require('events');
-var TCPEvent = require('./TCPEvent');
+var TCPConnectorEvent = require('./TCPConnectorEvent');
 
 class TCPConnector extends EventEmitter {
+  constructor(messageBuffer) {
+    super();
+    this._messageBuffer = messageBuffer;
+  }
+  
   connect(address) {
     var tokens = address.split('//');
     if (2 !== tokens.length) {
@@ -21,22 +26,34 @@ class TCPConnector extends EventEmitter {
     this._session.addListener('close', function() {
       that._onClosed();
     });
-    this._session.connect(port, host, function() {
+    this._session.addListener('connect', function(){
       that._onConnected();
-    }); 
+    });
+    this._session.connect(port, host); 
   }
-  
+
+  /**
+   * 소켓을 종료한다. FIN 패킷을 통한 정상적인 방식 
+   */
   close() {
     this._session.end();
     this._session = null;
   }
+ 
+  /**
+   * 소켓을 강제 종료한다. 에러 처리 상황때에만 사용한다.
+   */
+  destroy() {
+    this._session.destroy();
+    this._session = null;
+  }
   
   _onConnected() {
-    this.emit(TCPEvent.CONNECTED);
+    this.emit(TCPConnectorEvent.CONNECTED);
   }
   
   _onClosed() {
-    this.emit(TCPEvent.DISCONNECTED);
+    this.emit(TCPConnectorEvent.DISCONNECTED);
   }
 }
 

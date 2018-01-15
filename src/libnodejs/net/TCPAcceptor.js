@@ -1,12 +1,15 @@
 /*jshint esnext: true */
 var net = require('net');
 var EventEmitter = require('events');
-var TCPEvent = require('./TCPEvent');
+var TCPAcceptorEvent = require('./TCPAcceptorEvent');
+var TCPRemotor = require('./TCPRemotor');
 
 class TCPAcceptor extends EventEmitter {
-  constructor() {
+  constructor(messageBuffer) {
     super();
+    this._messageBuffer = messageBuffer;
     this._clients = [];
+    this._idCount = 0;
   }
   
   /**
@@ -33,6 +36,7 @@ class TCPAcceptor extends EventEmitter {
     this._session.addListener('close', function() {
       that._onServerClosed();
     });
+    this._session.addListener
     var host = tokens[0];
     var port = tokens[1];
     this._session.listen(port, host);
@@ -40,38 +44,54 @@ class TCPAcceptor extends EventEmitter {
   
   close() {
     for (var i = 0; i < this._clients.length; ++i) {
-      this._clients[i].destroy();
+      this._clients[i].close();
     }
     this._session.close();
   }
   
   _onListening() {
-    this.emit(TCPEvent.LISTENING);
+    this.emit(TCPAcceptorEvent.LISTENING);
   }
-  
+ 
+  /**
+   * 클라이언트 접속이 발생하면 호출된다
+   * 
+   * @param socket Socket 클라이언트 소켓
+   */
   _onConnected(socket) {
-    this._clients.push(socket);
-   
+    var remotor = new TCPRemotor(socket, ++this._idCount);
+    
     var that = this;
     socket.on('close', function() {
-      that._onClientClosed(socket);
+      that._onClientClosed(remotor);
     });
+    socket.on('data', function(data) {
+      that._onClientData(remoter, data);
+    });
+    this._clients.push(remotor);
     
-    this.emit(TCPEvent.CONNECTED);
+    this.emit(TCPAcceptorEvent.CONNECTED, new TCPAcceptorEvent(remotor));
   }
  
   /**
-   * 서버 소켓이 닫히면 발생하는 이벤트. 접속한 클라이언트 소켓이 모두 접속이 해제된 시점에 발생
+   * 서버 소켓이 닫히면 호출된다. 접속한 클라이언트 소켓이 모두 접속이 해제된 시점에 발생
    */
   _onServerClosed() {
-    this.emit(TCPEvent.DISCONNECTED);
   }
  
   /**
-   * 접속한 클라이언트 소켓이 닫히면 발생하는 이벤트 
+   * 접속한 클라이언트 소켓이 닫히면 호출된다.
+   * 
+   * @param remotor TCPRemotor 클라이언트 리모터
    */
-  _onClientClosed(socket) {
-    this._clients.splice(this._clients.indexOf(socket), 1);
+  _onClientClosed(remotor) {
+    this._clients.splice(this._clients.indexOf(remotor), 1);
+    this.emit(TCPAcceptorEvent.DISCONNECTED, new TCPAcceptorEvent(remotor));
+  }
+  
+  _onClientData(remoter, data) {
+    // 1. 데이터 버퍼에 데이터를 쌇고 pullMessages호출하고 이벤트 객체에 넣어서 이벤트 발생
+    //this.emit(TCPAcceptorEvent.DISCONNECTED, new TCPAcceptorEvent(remotor));
   }
 }
 

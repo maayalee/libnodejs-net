@@ -2,16 +2,16 @@
 var TestCase = require('libnodejs-unittest/src/libnodejs/test/TestCase');
 var TestSuite = require('libnodejs-unittest/src/libnodejs/test/TestSuite');
 var assert = require('assert');
-var MessageBuffer = require('../../../../src/libnodejs/net/MessageBuffer');
+var LineStringBuffer = require('../../../../src/libnodejs/net/LineStringBuffer');
 
-class MessageBufferTest extends TestCase {
+class LineStringBufferTest extends TestCase {
   constructor(methodName) {
     super(methodName);
     this.buffer = null; 
   }
 
   _setUp() {
-    this.buffer = new MessageBuffer();
+    this.buffer = new LineStringBuffer();
   }
 
   _tearDown() {
@@ -60,15 +60,15 @@ class MessageBufferTest extends TestCase {
   }
 
   static createSuite() {
-    var suite = new TestSuite('MessageBufferTest');
-    suite.add(new MessageBufferTest('testPush'));
-    suite.add(new MessageBufferTest('testPull'));
-    suite.add(new MessageBufferTest('testFragmentMessage'));
-    suite.add(new MessageBufferTest('testNewlineString'));
-    suite.add(new MessageBufferTest('testEmptyString'));
+    var suite = new TestSuite('LineStringBufferTest');
+    suite.add(new LineStringBufferTest('testPush'));
+    suite.add(new LineStringBufferTest('testPull'));
+    suite.add(new LineStringBufferTest('testFragmentMessage'));
+    suite.add(new LineStringBufferTest('testNewlineString'));
+    suite.add(new LineStringBufferTest('testEmptyString'));
     return suite;
   }
 }
 
-module.exports = MessageBufferTest;
+module.exports = LineStringBufferTest;
 
