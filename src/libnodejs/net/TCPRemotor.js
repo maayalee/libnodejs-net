@@ -15,6 +15,10 @@ class TCPRemotor {
     this._socket = null;
   }
   
+  send(data) {
+    this._socket.write(data);
+  }
+  
   destroy() {
     this._socket.destroy();
     this._socket = null;
@@ -22,6 +26,10 @@ class TCPRemotor {
   
   print() {
     console.log('id is ' + this._id);
+  }
+  
+  getID() {
+    return this._id;
   }
 }
 

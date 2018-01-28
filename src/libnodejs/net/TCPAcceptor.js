@@ -3,6 +3,7 @@ var net = require('net');
 var EventEmitter = require('events');
 var TCPAcceptorEvent = require('./TCPAcceptorEvent');
 var TCPRemotor = require('./TCPRemotor');
+var TCPDataEvent = require('./TCPDataEvent');
 
 class TCPAcceptor extends EventEmitter {
   constructor(messageBuffer) {
@@ -62,11 +63,11 @@ class TCPAcceptor extends EventEmitter {
     var remotor = new TCPRemotor(socket, ++this._idCount);
     
     var that = this;
-    socket.on('close', function() {
+    socket.addListener('close', function() {
       that._onClientClosed(remotor);
     });
-    socket.on('data', function(data) {
-      that._onClientData(remoter, data);
+    socket.addListener('data', function(data) {
+      that._onClientData(remotor, data);
     });
     this._clients.push(remotor);
     
@@ -89,9 +90,12 @@ class TCPAcceptor extends EventEmitter {
     this.emit(TCPAcceptorEvent.DISCONNECTED, new TCPAcceptorEvent(remotor));
   }
   
-  _onClientData(remoter, data) {
-    // 1. 데이터 버퍼에 데이터를 쌇고 pullMessages호출하고 이벤트 객체에 넣어서 이벤트 발생
-    //this.emit(TCPAcceptorEvent.DISCONNECTED, new TCPAcceptorEvent(remotor));
+  _onClientData(remotor, data) {
+    this._messageBuffer.push(data);
+    var messages = this._messageBuffer.pullMessages();
+    if (messages.length > 0) {
+      this.emit(TCPDataEvent.RECV_MESSAGE, new TCPDataEvent(remotor, messages));
+    }
   }
 }
 
